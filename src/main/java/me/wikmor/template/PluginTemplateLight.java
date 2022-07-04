@@ -46,6 +46,29 @@ public final class PluginTemplateLight extends SimplePlugin {
 	}
 
 	@EventHandler
+	public void onJoin(PlayerJoinEvent event) {
+		Player player = event.getPlayer();
+		PlayerInventory inventory = player.getInventory();
+		ItemStack[] contents = inventory.getContents();
+
+		for (int slot = 0; slot < contents.length; slot++) {
+			ItemStack item = contents[slot];
+			boolean isDiamond = item != null && item.getType() == Material.DIAMOND;
+
+			if (item == null || isDiamond) {
+				int diamondAmount = isDiamond ? item.getAmount() : 0;
+
+				contents[slot] = new ItemStack(Material.DIAMOND, diamondAmount + 1);
+				player.sendMessage("You've been given 1x Diamond to your " + slot + " slot.");
+
+				break;
+			}
+		}
+
+		inventory.setContents(contents);
+	}
+
+	@EventHandler
 	public void onRightClickAnything(PlayerInteractEvent event) {
 		if (event.getClickedBlock() != null && event.getClickedBlock().getType() == CompMaterial.GRASS_BLOCK.getMaterial())
 			handleClickingGrass(event.getClickedBlock(), event.getPlayer());
