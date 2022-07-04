@@ -2,9 +2,11 @@ package me.wikmor.template;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Queue;
+import java.util.Map;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
@@ -16,7 +18,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.mineacademy.fo.model.LimitedQueue;
+import org.mineacademy.fo.ChatUtil;
+import org.mineacademy.fo.MathUtil;
 import org.mineacademy.fo.plugin.SimplePlugin;
 import org.mineacademy.fo.remain.CompMaterial;
 
@@ -32,6 +35,8 @@ public final class PluginTemplateLight extends SimplePlugin {
 	private final List<Material> rewards = Arrays.asList(
 			Material.DIAMOND,
 			Material.BAKED_POTATO);
+
+	private final Map<String, String> lastPlayerMessage = new HashMap<>();
 
 	/**
 	* Automatically perform login ONCE when the plugin starts.
@@ -84,13 +89,22 @@ public final class PluginTemplateLight extends SimplePlugin {
 		inventory.setContents(contents);*/
 	}
 
-	Queue<String> messages = new LimitedQueue<>(3);
-
 	@EventHandler
 	public void onChat(AsyncPlayerChatEvent event) {
-		messages.add(event.getMessage());
+		Player player = event.getPlayer();
+		String playerName = player.getName();
+		String message = event.getMessage();
 
-		System.out.println("Last 3 messages from all players in the chat: " + this.messages);
+		String lastMessage = this.lastPlayerMessage.get(playerName);
+		double similarity = lastMessage != null ? ChatUtil.getSimilarityPercentage(lastMessage, message) : 0;
+
+		if (similarity > 0.85) {
+			player.sendMessage(ChatColor.RED + "Please don't type message " + MathUtil.formatOneDigit(similarity * 100) + "% similar.");
+
+			event.setCancelled(true);
+
+		} else
+			this.lastPlayerMessage.put(playerName, message);
 	}
 
 	@EventHandler
