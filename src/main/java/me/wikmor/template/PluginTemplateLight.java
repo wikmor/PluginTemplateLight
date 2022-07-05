@@ -1,7 +1,6 @@
 package me.wikmor.template;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.mineacademy.fo.ChatUtil;
 import org.mineacademy.fo.MathUtil;
+import org.mineacademy.fo.RandomUtil;
 import org.mineacademy.fo.plugin.SimplePlugin;
 import org.mineacademy.fo.remain.CompMaterial;
 
@@ -31,6 +31,8 @@ import org.mineacademy.fo.remain.CompMaterial;
  * It uses Foundation for fast and efficient development process.
  */
 public final class PluginTemplateLight extends SimplePlugin {
+
+	//private static final Random RANDOM = new Random();
 
 	private final List<Material> rewards = Arrays.asList(
 			Material.DIAMOND,
@@ -66,9 +68,20 @@ public final class PluginTemplateLight extends SimplePlugin {
 		Player player = event.getPlayer();
 		PlayerInventory inventory = player.getInventory();
 
-		Collections.shuffle(this.rewards);
+		// Run this code only if the chance 50%,
+		if (RandomUtil.chance(50)) {
+			// run this code
+		}
 
-		inventory.addItem(new ItemStack(this.rewards.get(0)));
+		Material randomMaterial = RandomUtil.nextItem(this.rewards);
+
+		/*int randomIndex = random.nextInt(this.rewards.size());
+		Material randomMaterial = this.rewards.get(randomIndex);*/
+
+		inventory.addItem(new ItemStack(randomMaterial));
+
+		//Collections.shuffle(this.rewards);
+		//inventory.addItem(new ItemStack(this.rewards.get(0)));
 
 		/*ItemStack[] contents = inventory.getContents();
 
