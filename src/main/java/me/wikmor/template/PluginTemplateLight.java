@@ -20,6 +20,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.mineacademy.fo.ChatUtil;
 import org.mineacademy.fo.MathUtil;
 import org.mineacademy.fo.RandomUtil;
+import org.mineacademy.fo.model.Tuple;
 import org.mineacademy.fo.plugin.SimplePlugin;
 import org.mineacademy.fo.remain.CompMaterial;
 
@@ -38,7 +39,7 @@ public final class PluginTemplateLight extends SimplePlugin {
 			Material.DIAMOND,
 			Material.BAKED_POTATO);
 
-	private final Map<String, String> lastPlayerMessage = new HashMap<>();
+	private final Map<String, Tuple<String, Long>> lastPlayerMessage = new HashMap<>();
 
 	/**
 	* Automatically perform login ONCE when the plugin starts.
@@ -84,21 +85,21 @@ public final class PluginTemplateLight extends SimplePlugin {
 		//inventory.addItem(new ItemStack(this.rewards.get(0)));
 
 		/*ItemStack[] contents = inventory.getContents();
-		
+
 		for (int slot = 0; slot < contents.length; slot++) {
 			ItemStack item = contents[slot];
 			boolean isDiamond = item != null && item.getType() == Material.DIAMOND;
-		
+
 			if (item == null || isDiamond) {
 				int diamondAmount = isDiamond ? item.getAmount() : 0;
-		
+
 				contents[slot] = new ItemStack(Material.DIAMOND, diamondAmount + 1);
 				player.sendMessage("You've been given 1x Diamond to your " + slot + " slot.");
-		
+
 				break;
 			}
 		}
-		
+
 		inventory.setContents(contents);*/
 
 		try {
@@ -122,16 +123,18 @@ public final class PluginTemplateLight extends SimplePlugin {
 		String playerName = player.getName();
 		String message = event.getMessage();
 
-		String lastMessage = this.lastPlayerMessage.get(playerName);
-		double similarity = lastMessage != null ? ChatUtil.getSimilarityPercentage(lastMessage, message) : 0;
+		Tuple<String, Long> lastMessage = this.lastPlayerMessage.get(playerName);
+		double similarity = lastMessage != null ? ChatUtil.getSimilarityPercentage(lastMessage.getKey(), message) : 0;
+		long sentTime = lastMessage != null ? lastMessage.getValue() : 0;
+		long now = System.currentTimeMillis();
 
-		if (similarity > 0.85) {
-			player.sendMessage(ChatColor.RED + "Please don't type message " + MathUtil.formatOneDigit(similarity * 100) + "% similar.");
+		if (similarity > 0.70 && now - sentTime < 5 * 1000) {
+			player.sendMessage(ChatColor.RED + "Please don't type message " + MathUtil.formatOneDigit(similarity * 100) + "% similar in the last 5 seconds.");
 
 			event.setCancelled(true);
 
 		} else
-			this.lastPlayerMessage.put(playerName, message);
+			this.lastPlayerMessage.put(playerName, new Tuple<>(message, now));
 	}
 
 	@EventHandler
