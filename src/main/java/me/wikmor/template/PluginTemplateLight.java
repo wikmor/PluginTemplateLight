@@ -84,22 +84,36 @@ public final class PluginTemplateLight extends SimplePlugin {
 		//inventory.addItem(new ItemStack(this.rewards.get(0)));
 
 		/*ItemStack[] contents = inventory.getContents();
-
+		
 		for (int slot = 0; slot < contents.length; slot++) {
 			ItemStack item = contents[slot];
 			boolean isDiamond = item != null && item.getType() == Material.DIAMOND;
-
+		
 			if (item == null || isDiamond) {
 				int diamondAmount = isDiamond ? item.getAmount() : 0;
-
+		
 				contents[slot] = new ItemStack(Material.DIAMOND, diamondAmount + 1);
 				player.sendMessage("You've been given 1x Diamond to your " + slot + " slot.");
-
+		
 				break;
 			}
 		}
-
+		
 		inventory.setContents(contents);*/
+
+		try {
+			players: for (Player online : getServer().getOnlinePlayers()) {
+				for (ItemStack item : online.getInventory().getContents())
+					if (item.getType() == Material.DIAMOND) {
+						// stop looking for more players, we've found the first one having a diamond
+						System.out.println("First found player having a diamond: " + online.getName());
+						break players;
+					}
+			}
+
+		} catch (NullPointerException e) {
+			System.out.println("No one found with a diamond!");
+		}
 	}
 
 	@EventHandler
